@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}总览{% endblock %}
+{% block subtitle %}微信发「外婆 血压145/92」即可录入{% endblock %}
+{% block content %}
+<div class="kpis">
+  {% for c in cards %}
+  <div class="kpi">
+    <div class="label">{{ c.member.name }}{% if c.member.relation %} · {{ c.member.relation }}{% endif %}</div>
+    {% if c.bp %}
+      {% set lv = {'正常':'lv-ok','正常高值':'lv-watch','1级高血压':'lv-1','2级高血压':'lv-2','3级高血压':'lv-3','偏低':'lv-low'}.get(c.label,'lv-watch') %}
+      <div class="val">{{ c.bp.systolic|round|int }}/{{ c.bp.diastolic|round|int }}
+        <span class="tag {{ lv }}" style="font-size:12px;vertical-align:4px">{{ c.label }}</span>
+      </div>
+      <div class="sub">
+        {% if c.bp.heart_rate %}心率 {{ c.bp.heart_rate|round|int }} · {% endif %}{{ c.bp.measured_at|dt }}
+        {% if c.week_elevated %} · <span class="up">本周超标 {{ c.week_elevated }} 次</span>{% endif %}
+      </div>
+      {% if c.weight %}
+      <div class="sub">体重 {{ c.weight.weight_kg|round(1) }}kg · {{ c.weight.measured_at|dt }}</div>
+      {% endif %}
+    {% else %}
+      <div class="val" style="color:var(--muted)">暂无记录</div>
+      <div class="sub">微信发「{{ c.member.name }} 血压120/80」</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+  {% if not cards %}
+  <div class="kpi"><div class="val" style="color:var(--muted)">还没有成员</div>
+  <div class="sub">先到「成员」页添加家人</div></div>
+  {% endif %}
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <div class="sec-title">血压趋势（近30天）
+      <form method="get" action="/" class="inline">
+        <select name="member" onchange="this.form.submit()">
+          {% for m in members %}<option value="{{ m.id }}" {{ 'selected' if m.id==selected_id }}>{{ m.name }}</option>{% endfor %}
+        </select>
+      </form>
+    </div>
+    <div id="chart-bp" class="chart"></div>
+  </div>
+  <div class="card">
+    <div class="sec-title">体重趋势（近30天）</div>
+    <div id="chart-wt" class="chart"></div>
+  </div>
+</div>
+
+{% if warnings %}
+<div class="card">
+  <div class="sec-title">⚠️ 本周超标记录</div>
+  {% for r in warnings %}
+  <div class="warnline">
+    <span class="tag lv-1">超标</span>
+    <b>{{ r.member.name }}</b> {{ r.measured_at|dt }}
+    血压 <b>{{ r.systolic|round|int }}/{{ r.diastolic|round|int }}</b>
+    {% if r.heart_rate %}心率 {{ r.heart_rate|round|int }}{% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="card overflow">
+  <div class="sec-title">最近记录 <a class="btn sm" href="/readings" style="margin-left:auto">全部记录</a></div>
+  {% if recent %}
+  <table>
+    <thead><tr><th>成员</th><th>类型</th><th>数值</th><th>时间</th><th>来源</th></tr></thead>
+    <tbody>
+    {% for r in recent %}
+      <tr>
+        <td><b>{{ r.member.name }}</b></td>
+        <td>{{ '血压' if r.kind=='bp' else '体重' }}</td>
+        <td>
+          {% if r.kind=='bp' %}<b>{{ r.systolic|round|int }}/{{ r.diastolic|round|int }}</b> mmHg{% if r.heart_rate %} · 心率 {{ r.heart_rate|round|int }}{% endif %}
+          {% else %}<b>{{ r.weight_kg|round(1) }}</b> kg{% if r.body_fat_pct %} · 体脂 {{ r.body_fat_pct|round(1) }}%{% endif %}
+          {% endif %}
+        </td>
+        <td>{{ r.measured_at|dt }}</td>
+        <td style="color:var(--muted)">{{ {'text':'微信','photo':'拍照','manual':'手动','api':'接口'}.get(r.source, r.source) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">还没有记录，微信发一条试试</div>
+  {% endif %}
+</div>
+
+<script id="chart-data" type="application/json">{{ {"bp": series_bp, "wt": series_wt}|tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script>if (typeof bootHealth === 'function') bootHealth();</script>
+{% endblock %}

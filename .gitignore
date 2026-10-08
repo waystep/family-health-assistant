@@ -1,0 +1,19 @@
+# 运行时数据(含个人健康数据,严禁提交)
+data/
+*.db
+*.db-journal
+
+# 环境与密钥
+.env
+wecom-bot/.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 本地备份/临时文件
+.venv-frozen-backup.txt
+*.log
+.DS_Store

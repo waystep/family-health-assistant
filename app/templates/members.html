@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}家庭成员{% endblock %}
+{% block subtitle %}别名用于微信消息识别（如：妈妈,我妈,母亲）{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="sec-title">➕ 添加成员</div>
+  <form method="post" action="/members" class="form-row">
+    <label class="f">称呼 <input name="name" required placeholder="如：外婆" class="w-md"></label>
+    <label class="f">别名 <input name="aliases" placeholder="妈,我妈,母亲（逗号分隔）" class="w-md"></label>
+    <label class="f">关系 <input name="relation" placeholder="如：外婆 / 母亲" class="w-md"></label>
+    <label class="f">备注 <input name="note" class="w-md"></label>
+    <button class="btn primary">添加</button>
+  </form>
+</div>
+
+<div class="card overflow">
+  <div class="sec-title">成员列表</div>
+  {% if members %}
+  <table>
+    <thead><tr><th>称呼</th><th>别名</th><th>关系</th><th>备注</th><th></th></tr></thead>
+    <tbody>
+    {% for m in members %}
+      <tr>
+        <td><b>{{ m.name }}</b></td>
+        <td style="color:var(--muted)">{{ m.aliases }}</td>
+        <td>{{ m.relation }}</td>
+        <td style="color:var(--muted)">{{ m.note }}</td>
+        <td><form method="post" action="/members/{{ m.id }}/delete" class="js-del"><button class="btn sm danger">删除</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">还没有成员，先添加家人</div>
+  {% endif %}
+</div>
+{% endblock %}

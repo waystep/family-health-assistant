@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}健康周报{% endblock %}
+{% block subtitle %}每周日 20:30 自动推送到微信，也可在此生成查看{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" action="/report" class="inline">
+    <label class="f">成员
+      <select name="member" onchange="this.form.submit()">
+        {% for m in members %}<option value="{{ m.id }}" {{ 'selected' if m.id==member_id }}>{{ m.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <button class="btn primary">生成</button>
+  </form>
+</div>
+<div class="card">
+  <div class="sec-title">周报内容 <span class="tag">可直接复制发到微信</span></div>
+  {% if report %}
+  <textarea readonly style="width:100%;min-height:220px;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.7">{{ report }}</textarea>
+  {% else %}
+  <div class="empty">先添加成员后生成</div>
+  {% endif %}
+</div>
+{% endblock %}

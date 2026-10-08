@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}测量记录{% endblock %}
+{% block subtitle %}微信消息自动录入 + 手动补录{% endblock %}
+{% block content %}
+<div class="card">
+  <div class="sec-title">➕ 手动补录</div>
+  <form method="post" action="/readings" class="form-row">
+    <label class="f">成员
+      <select name="member_id" required>
+        {% for m in members %}<option value="{{ m.id }}">{{ m.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label class="f">类型
+      <select name="kind" id="kind">
+        <option value="bp">血压</option>
+        <option value="weight">体重</option>
+      </select>
+    </label>
+    <label class="f">收缩压 <input name="systolic" type="number" step="1" class="w-sm"></label>
+    <label class="f">舒张压 <input name="diastolic" type="number" step="1" class="w-sm"></label>
+    <label class="f">心率 <input name="heart_rate" type="number" step="1" class="w-sm"></label>
+    <label class="f">体重kg <input name="weight_kg" type="number" step="0.1" class="w-sm"></label>
+    <label class="f">体脂% <input name="body_fat_pct" type="number" step="0.1" class="w-sm"></label>
+    <label class="f">时间 <input name="measured_at" type="datetime-local" value="{{ now }}" class="w-md"></label>
+    <button class="btn primary">保存</button>
+  </form>
+  <p style="color:var(--muted);font-size:12px;margin:10px 0 0">血压记录填收缩压/舒张压（可加心率）；体重记录填体重（可加体脂）。</p>
+</div>
+
+<div class="card overflow">
+  <div class="sec-title">全部记录（最近100条）</div>
+  {% if readings %}
+  <table>
+    <thead><tr><th>成员</th><th>类型</th><th>数值</th><th>时间</th><th>来源</th><th>原始消息</th><th></th></tr></thead>
+    <tbody>
+    {% for r in readings %}
+      <tr>
+        <td><b>{{ r.member.name }}</b></td>
+        <td>{{ '血压' if r.kind=='bp' else '体重' }}</td>
+        <td>
+          {% if r.kind=='bp' %}<b>{{ r.systolic|round|int }}/{{ r.diastolic|round|int }}</b>{% if r.heart_rate %} · 心率 {{ r.heart_rate|round|int }}{% endif %}
+          {% else %}<b>{{ r.weight_kg|round(1) }}</b>kg{% if r.body_fat_pct %} · 体脂 {{ r.body_fat_pct|round(1) }}%{% endif %}
+          {% endif %}
+        </td>
+        <td>{{ r.measured_at|dt }}</td>
+        <td style="color:var(--muted)">{{ {'text':'微信','photo':'拍照','manual':'手动','api':'接口'}.get(r.source, r.source) }}</td>
+        <td style="color:var(--muted);max-width:220px;overflow:hidden;text-overflow:ellipsis">{{ r.raw_text }}</td>
+        <td><form method="post" action="/readings/{{ r.id }}/delete" class="js-del"><button class="btn sm danger">删除</button></form></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">还没有记录</div>
+  {% endif %}
+</div>
+{% endblock %}

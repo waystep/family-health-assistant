@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家庭健康助手</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="https://cdn.staticfile.net/echarts/5.4.3/echarts.min.js"></script>
+<script>window.echarts||document.write('<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"><\/script>');</script>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand">
+      <div class="logo">🩺</div>
+      <div><b>家庭健康助手</b><p>血压 · 体重 · 提醒</p></div>
+    </div>
+    <nav>
+      <a href="/" class="{{ 'on' if page=='dashboard' else '' }}"><span class="ico">🏠</span>总览</a>
+      <a href="/readings" class="{{ 'on' if page=='readings' else '' }}"><span class="ico">📋</span>记录</a>
+      <a href="/members" class="{{ 'on' if page=='members' else '' }}"><span class="ico">👨‍👩‍👧</span>成员</a>
+      <a href="/report" class="{{ 'on' if page=='report' else '' }}"><span class="ico">📄</span>周报</a>
+    </nav>
+    <div class="side-foot">微信发消息即可录入<br>数据保存在本地 data/ 目录</div>
+  </aside>
+  <main>
+    <header class="top">
+      <div>
+        <h1>{% block title %}{% endblock %}</h1>
+        <div class="sub">{% block subtitle %}{% endblock %}</div>
+      </div>
+      {% block header_extra %}{% endblock %}
+    </header>
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
